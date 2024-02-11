@@ -12,6 +12,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       // "https://daily-pulse-newspaper.web.app",
       // "https://daily-pulse-newspaper.firebaseapp.com"
     ],
@@ -20,7 +21,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
-  
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@newsblogs.gtqtaqh.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -32,8 +33,7 @@ const client = new MongoClient(uri, {
   },
 });
 
-
-// middlewares  
+// middlewares
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
   if (!token) {
@@ -55,11 +55,11 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.connect();
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
 
     // collections
     const articles = client.db("newspaperDB").collection("articles");
@@ -228,8 +228,9 @@ async function run() {
       if (filter) {
         return res.send({ message: "user already exists", insertedId: null });
       }
-      const result = await users.insertOne(user);
-      res.send(result);
+      // const result = await users.insertOne(user);
+      // res.send(result);
+      res.send(user);
     });
 
     // ------------------------------------articles all api-------------------------------------------
@@ -395,20 +396,19 @@ async function run() {
 
     // --------------------------------------ping section--------------------------------------------------------
     // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
-    // console.log(
-    //   "Pinged your deployment. You successfully connected to MongoDB!"
-    // );
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
+    await client.db("admin").command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
+  } catch (e) {
+    console.log(e); 
+  } 
 }
 run().catch(console.dir);
 
 // server status
 app.get("/", (req, res) => {
-  res.send("Newspaper server is running");
+  res.send("Newspaper server is running at port 5002");
 });
 app.listen(port, () => {
   console.log(`Newspaper server is running at http://localhost:${port}`);
